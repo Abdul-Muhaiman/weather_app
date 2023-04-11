@@ -38,7 +38,7 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                   return SizedBox(
                     width: width,
                     height: height,
-                    child: Center(
+                    child: const Center(
                       child: CircularProgressIndicator(),
                     ),
                   );
@@ -58,7 +58,7 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                             search
                                 ? AnimatedContainer(
                                     width: width * 0.5,
-                                    duration: Duration(milliseconds: 500),
+                                    duration: const Duration(milliseconds: 500),
                                     child: TextFormField(
                                       controller: searchController,
                                       decoration: InputDecoration(
@@ -86,7 +86,8 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                                   )
                                 : Text(
                                     'Current weather',
-                                    style: GoogleFonts.getFont('Comfortaa',fontSize: 22),
+                                    style: GoogleFonts.getFont('Comfortaa',
+                                        fontSize: 22),
                                   ),
                             Align(
                               alignment: Alignment.topLeft,
@@ -104,7 +105,7 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                                       });
                                     }
                                   },
-                                  icon: Icon(Icons.search)),
+                                  icon: const Icon(Icons.search)),
                             )
                           ],
                         ),
@@ -246,7 +247,8 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                         child: Center(
                           child: Text(
                             '7-days forecast',
-                            style: GoogleFonts.getFont('Comfortaa',fontSize: 22),
+                            style:
+                                GoogleFonts.getFont('Comfortaa', fontSize: 22),
                           ),
                         ),
                       ),
@@ -351,90 +353,6 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                           },
                         ),
                       ),
-
-                      // Container(
-                      //   width: MediaQuery.of(context).size.width * 0.8,
-                      //   child: ListView.builder(
-                      //     itemCount: forecast.length,
-                      //     scrollDirection: Axis.horizontal,
-                      //     itemBuilder: (context, index) {
-                      //       return Padding(
-                      //         padding: EdgeInsets.symmetric(horizontal: 5),
-                      //         child: Container(
-                      //           width: MediaQuery.of(context).size.width * 0.35,
-                      //           padding: const EdgeInsets.symmetric(
-                      //               vertical: 15, horizontal: 10),
-                      //           decoration: BoxDecoration(
-                      //             color: Colors.white,
-                      //             borderRadius: BorderRadius.circular(15),
-                      //             boxShadow: [
-                      //               BoxShadow(
-                      //                 color: Colors.grey.shade400,
-                      //                 blurRadius: 5, // soften the shadow
-                      //                 spreadRadius: 2.0, //extend the shadow
-                      //                 offset: const Offset(
-                      //                   0.0, // Move to right 5  horizontally
-                      //                   1.0,
-                      //                 ),
-                      //               )
-                      //             ],
-                      //           ),
-                      //           child: Column(
-                      //             mainAxisAlignment:
-                      //                 MainAxisAlignment.spaceBetween,
-                      //             children: [
-                      //               Text(
-                      //                 forecast[index]['weather']['description'],
-                      //                 textAlign: TextAlign.center,
-                      //                 style: const TextStyle(
-                      //                   fontSize: 16,
-                      //                 ),
-                      //               ),
-                      //               const SizedBox(
-                      //                 height: 50,
-                      //                 width: 50,
-                      //                 child: Image(
-                      //                     image: AssetImage(
-                      //                         'assets/icons/snow_icon.png')),
-                      //               ),
-                      //               Column(
-                      //                 children: [
-                      //                   Row(
-                      //                     mainAxisAlignment:
-                      //                         MainAxisAlignment.spaceBetween,
-                      //                     children: [
-                      //                       Row(
-                      //                         children: [
-                      //                           const Icon(
-                      //                             Icons.arrow_downward_rounded,
-                      //                             size: 18,
-                      //                           ),
-                      //                           Text(forecast[index]['low_temp']
-                      //                               .toString()),
-                      //                         ],
-                      //                       ),
-                      //                       Row(
-                      //                         children: [
-                      //                           const Icon(
-                      //                             Icons.arrow_upward_rounded,
-                      //                             size: 18,
-                      //                           ),
-                      //                           Text(forecast[index]['high_temp']
-                      //                               .toString()),
-                      //                         ],
-                      //                       ),
-                      //                     ],
-                      //                   ),
-                      //                   // Text(forecast[index]['datetime']),
-                      //                 ],
-                      //               )
-                      //             ],
-                      //           ),
-                      //         ),
-                      //       );
-                      //     },
-                      //   ),
-                      // ),
                     ],
                   );
                 }
