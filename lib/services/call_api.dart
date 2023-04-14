@@ -6,7 +6,7 @@ import 'package:weather_app/utils/utils.dart';
 class GetAPIData {
   static String baseUrl =
       'https://api.weatherbit.io/v2.0/forecast/daily?&city=risalpur&days=7';
-  String APIKey = 'e95f6309a4d44379aa86afa2ee08fc80';
+  String APIKey = "YOUR_API_KEY";
   // https://api.weatherbit.io/v2.0/current
   Future<Map<String, dynamic>> getWeatherData(String key, String city) async {
     String currentWeatherUrl =
