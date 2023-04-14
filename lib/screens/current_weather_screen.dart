@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:weather_app/services/call_api.dart';
-import 'package:weather_app/utils/dummy_data.dart';
+import 'package:weather_app/services/current_location.dart';
 import 'package:weather_app/utils/utils.dart';
+import 'package:weather_app/widgets/7_days_forecast_data.dart';
+import 'package:weather_app/widgets/main_title_widget.dart';
 
+import '../utils/dummy_data.dart';
 import '../widgets/card_widget.dart';
 import '../widgets/heading_n_content.dart';
+import 'getx_services.dart';
 
 class CurrentWeatherScreen extends StatefulWidget {
   const CurrentWeatherScreen({Key? key}) : super(key: key);
@@ -15,260 +20,127 @@ class CurrentWeatherScreen extends StatefulWidget {
 }
 
 class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
+  //getx controller
+  final getxController = Get.put(GetxServices());
+  //dump data for making app UI
   final GetAPIData getData = GetAPIData();
-  final DummyData dummyData = DummyData();
+  final dummyData = DummyData();
+  //Instances
+  //Utilities
   final Utilities utilities = Utilities();
-  static String apiKey = 'e95f6309a4d44379aa86afa2ee08fc80';
+  //Getting current location
+  CurrentLocation currentLocation = CurrentLocation();
+
+  //Media Query shorthand
   late final width = MediaQuery.of(context).size.width;
   late final height = MediaQuery.of(context).size.height;
-  bool search = false;
-  var getCity = 'risalpur';
-  TextEditingController searchController = TextEditingController();
+
+  Future showSomething({required context, required builder}) {
+    return showDialog(context: context, builder: builder);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: width * 0.03),
-        child: Column(
-          children: [
-            FutureBuilder(
-              future: getData.getWeatherData(apiKey, getCity),
-              builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SizedBox(
-                    width: width,
-                    height: height,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                } else {
-                  var current = dummyData.Data['current']['data'][0];
-                  var forecast = dummyData.Data['forecast']['data'];
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: height * 0.02),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+    return Obx(() => getxController.isLoading.value
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.03),
+              child: Column(
+                children: [
+                  FutureBuilder(
+                    future: getData.getWeatherData(
+                        getData.APIKey, getxController.location.value),
+                    builder: (context,
+                        AsyncSnapshot<Map<String, dynamic>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return SizedBox(
+                          width: width,
+                          height: height,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      } else {
+                        // var current = dummyData.Data['current']['data'][0];
+                        var current = snapshot.data!['current']['data'][0];
+                        // var forecast = dummyData.Data['forecast']['data'];
+                        var forecast = snapshot.data!['forecast']['data'];
+                        return Column(
                           children: [
-                            search
-                                ? AnimatedContainer(
-                                    width: width * 0.5,
-                                    duration: const Duration(milliseconds: 500),
-                                    child: TextFormField(
-                                      controller: searchController,
-                                      decoration: InputDecoration(
-                                        hintText: 'Enter something here...',
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 10, vertical: 0),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            borderSide: BorderSide.none),
-                                        errorBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            borderSide: const BorderSide(
-                                                color: Colors.red, width: 2)),
-                                        errorStyle: const TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 0,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    'Current weather',
-                                    style: GoogleFonts.getFont('Comfortaa',
-                                        fontSize: 22),
-                                  ),
-                            Align(
-                              alignment: Alignment.topLeft,
-                              child: IconButton(
-                                  onPressed: () {
-                                    if (search) {
-                                      setState(() {
-                                        getCity = searchController.text;
-                                        searchController.clear();
-                                        search = false;
-                                      });
-                                    } else {
-                                      setState(() {
-                                        search = true;
-                                      });
-                                    }
-                                  },
-                                  icon: const Icon(Icons.search)),
-                            )
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: width * 0.05, vertical: height * 0.03),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(width * 0.05),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.shade400,
-                              blurRadius: 5, // soften the shadow
-                              spreadRadius: 2.0, //extend the shadow
-                              offset: const Offset(
-                                0.0, // Move to right 5  horizontally
-                                1.0,
-                              ),
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        '${current['city_name']}, ${current['country_code']}',
-                                        style: GoogleFonts.getFont(
-                                            'Public Sans',
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        current['weather']['description'],
-                                        style: GoogleFonts.publicSans(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        '${current['temp']}°C',
-                                        style: GoogleFonts.teko(
-                                          fontSize: 48,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Image(
-                                      image: AssetImage(
-                                          'assets/weatherbit_icons/${current['weather']['icon']}.png')),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: height * 0.015),
-                              child: Row(
+                            Obx(
+                              () => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Expanded(
-                                    child: CardWidget(
-                                      title: 'Sunrise',
-                                      description: utilities.convertUTCtoLocal(
-                                          current['sunrise']),
-                                      assetImage: 'assets/icons/sun_icon.png',
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: CardWidget(
-                                      title: 'Wind',
-                                      description:
-                                          '${current['wind_spd'].toStringAsFixed(1)} m/s',
-                                      assetImage: 'assets/icons/wind.png',
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: CardWidget(
-                                      title: 'Sunset',
-                                      description: utilities
-                                          .convertUTCtoLocal(current['sunset']),
-                                      assetImage: 'assets/icons/sun_set.png',
-                                    ),
-                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        getxController.isLoading.value = true;
+                                        currentLocation
+                                            .getCurrentLocation()
+                                            .then((value) {
+                                          getxController.location.value = value;
+                                          getxController.isLoading.value =
+                                              false;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.location_on)),
+                                  const Spacer(),
+                                  getxController.search.value
+                                      ? Container(
+                                          width: width * 0.5,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: height * 0.007),
+                                          child: TextFormField(
+                                            controller: getxController
+                                                .searchController.value,
+                                            decoration: InputDecoration(
+                                              hintText:
+                                                  'Enter something here...',
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 0),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  borderSide: BorderSide.none),
+                                              errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  borderSide: const BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              errorStyle: const TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 0,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Align(
+                                          alignment: Alignment.center,
+                                          child: MainTitleWidget(
+                                              title: 'Current Weather'),
+                                        ),
+                                  const Spacer(),
+                                  IconButton(
+                                      onPressed: () {
+                                        getxController.searchOnOff();
+                                      },
+                                      icon: const Icon(Icons.search)),
                                 ],
                               ),
                             ),
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    HeadingNContext(
-                                      title: 'Part of day',
-                                      titleContext: current['pod'] == 'd'
-                                          ? 'Day'
-                                          : 'Night',
-                                    ),
-                                    HeadingNContext(
-                                        title: 'Clouds',
-                                        titleContext: '${current['clouds']}%'),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    HeadingNContext(
-                                        title: 'Humidity',
-                                        titleContext: '${current['rh']}%'),
-                                    HeadingNContext(
-                                        title: 'Pressure',
-                                        titleContext: '${current['pres']}mb'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: height * 0.02),
-                        child: Center(
-                          child: Text(
-                            '7-days forecast',
-                            style:
-                                GoogleFonts.getFont('Comfortaa', fontSize: 22),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        child: ListView.builder(
-                          itemCount: forecast.length,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.33,
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: width * 0.015,
-                                  vertical: height * 0.005),
+                            Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: height * 0.005,
-                                  horizontal: width * 0.015),
+                                  horizontal: width * 0.05,
+                                  vertical: height * 0.03),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius:
+                                    BorderRadius.circular(width * 0.05),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.shade400,
@@ -282,85 +154,139 @@ class _CurrentWeatherScreenState extends State<CurrentWeatherScreen> {
                                 ],
                               ),
                               child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    forecast[index]['weather']['description'],
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.getFont(
-                                      'Public Sans',
-                                      fontSize: 16,
-                                    ),
+                                  Stack(
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text(
+                                              '${current['city_name']}, ${current['country_code']}',
+                                              style: GoogleFonts.getFont(
+                                                  'Public Sans',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text(
+                                              current['weather']['description'],
+                                              style: GoogleFonts.publicSans(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text(
+                                              '${current['temp']}°C',
+                                              style: GoogleFonts.teko(
+                                                fontSize: 48,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Image(
+                                            image: AssetImage(
+                                                'assets/weatherbit_icons/${current['weather']['icon']}.png')),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(
-                                    height: height * 0.08,
-                                    width: width * 0.3,
-                                    child: Image(
-                                      image: AssetImage(
-                                          'assets/weatherbit_icons/${forecast[index]['weather']['icon']}.png'),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: height * 0.015),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: CardWidget(
+                                            title: 'Sunrise',
+                                            description:
+                                                utilities.convertUTCtoLocal(
+                                                    current['sunrise']),
+                                            assetImage:
+                                                'assets/icons/sun_icon.png',
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: CardWidget(
+                                            title: 'Wind',
+                                            description:
+                                                '${current['wind_spd'].toStringAsFixed(1)} m/s',
+                                            assetImage: 'assets/icons/wind.png',
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: CardWidget(
+                                            title: 'Sunset',
+                                            description:
+                                                utilities.convertUTCtoLocal(
+                                                    current['sunset']),
+                                            assetImage:
+                                                'assets/icons/sun_set.png',
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   Column(
                                     children: [
                                       Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceAround,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.arrow_downward_rounded,
-                                                size: height * 0.02,
-                                              ),
-                                              Text(
-                                                '${forecast[index]['low_temp']}°C',
-                                                style: GoogleFonts.getFont(
-                                                    'Play',
-                                                    fontSize: 12),
-                                              ),
-                                            ],
+                                          HeadingNContext(
+                                            title: 'Part of day',
+                                            titleContext: current['pod'] == 'd'
+                                                ? 'Day'
+                                                : 'Night',
                                           ),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.arrow_upward_rounded,
-                                                size: height * 0.02,
-                                              ),
-                                              Text(
-                                                '${forecast[index]['high_temp']}°C',
-                                                style: GoogleFonts.getFont(
-                                                    'Play',
-                                                    fontSize: 12),
-                                              )
-                                            ],
-                                          ),
+                                          HeadingNContext(
+                                              title: 'Clouds',
+                                              titleContext:
+                                                  '${current['clouds']}%'),
                                         ],
                                       ),
-                                      Text(
-                                        utilities.getWeekDays(
-                                            forecast[index]['datetime']),
-                                        style: GoogleFonts.getFont(
-                                            'Public Sans',
-                                            fontSize: 16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          HeadingNContext(
+                                              title: 'Humidity',
+                                              titleContext:
+                                                  '${current['rh']}%'),
+                                          HeadingNContext(
+                                              title: 'Pressure',
+                                              titleContext:
+                                                  '${current['pres']}mb'),
+                                        ],
                                       ),
-                                      // Text(forecast[index]['datetime']),
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            )
-          ],
-        ),
-      ),
-    );
+                            ),
+                            MainTitleWidget(title: '7-days forecast'),
+                            SevenDaysForeCastWidget(
+                                data: forecast, width: width, height: height),
+                          ],
+                        );
+                      }
+                    },
+                  )
+                ],
+              ),
+            ),
+          ));
   }
 }

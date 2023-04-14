@@ -40,6 +40,10 @@ dependencies:
   google_fonts: ^4.0.3
   easy_search_bar: ^2.4.2
   fluttertoast: ^8.2.1
+  geolocator: ^9.0.2
+  geocoding: ^2.1.0
+  get: ^4.6.5
+  csv: ^5.0.1
 
 dev_dependencies:
   flutter_test:
